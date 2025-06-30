@@ -60,3 +60,15 @@ export const getMyStudentsTopics = () => {
 export const getMySelectedTopic = () => {
   return api.get('/topics/my-selection')
 }
+
+export const getMyStudentsTopicsInfo = () => {
+  return api.get('/topics/my-students-info')
+}
+export const getMyTeachersTopicsInfo = (studentId) => {
+  return api.get(`/topics/student-detail/${studentId}`)
+}
+
+//
+export const getTeacherDashboard = (teacherId) => {
+  return api.get(`/teacher/statistics/${teacherId}`)
+}

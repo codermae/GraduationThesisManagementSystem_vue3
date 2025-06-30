@@ -9,7 +9,7 @@
               <el-icon><Document /></el-icon>
             </div>
             <div class="stats-info">
-              <h3>{{ statistics.totalTopics || 0 }}</h3>
+              <h3>{{ statistics.totalTopicCount || 0 }}</h3>
               <p>发布选题</p>
             </div>
           </div>
@@ -23,7 +23,7 @@
               <el-icon><User /></el-icon>
             </div>
             <div class="stats-info">
-              <h3>{{ statistics.totalStudents || 0 }}</h3>
+              <h3>{{ statistics.totalStudentCount || 0 }}</h3>
               <p>指导学生</p>
             </div>
           </div>
@@ -37,7 +37,7 @@
               <el-icon><Check /></el-icon>
             </div>
             <div class="stats-info">
-              <h3>{{ statistics.gradedStudents || 0 }}</h3>
+              <h3>{{ statistics.completedGradingCount || 0 }}</h3>
               <p>已评分</p>
             </div>
           </div>
@@ -51,7 +51,7 @@
               <el-icon><Clock /></el-icon>
             </div>
             <div class="stats-info">
-              <h3>{{ statistics.ungradedStudents || 0 }}</h3>
+              <h3>{{ statistics.pendingGradingCount || 0 }}</h3>
               <p>待评分</p>
             </div>
           </div>
@@ -109,8 +109,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { getMyStudentsTopics } from '@/api/topics'
-// import { getStudentFilesStatistics } from '@/api/file'
+import { getMyStudentsTopics,getTeacherDashboard } from '@/api/topics'
+import { getMyStudentFilesAll } from '@/api/file'
 import * as echarts from 'echarts'
 import { Document, User, Check, Clock } from '@element-plus/icons-vue'
 
@@ -122,13 +122,13 @@ const recentSelections = ref([])
 const gradeChart = ref(null)
 const fileChart = ref(null)
 
-// 获取统计数据
+// 获取统计数据（发布选题、指导学生、已评分、带评分
 const fetchStatistics = async () => {
+  console.log(userStore)
   try {
-    // const response = await api.get('/grade/statistics', {
-    //   params: { teacherId: userStore.user.userId }
-    // })
-    // statistics.value = response.data.data
+    const response = await getTeacherDashboard(userStore.user.userId)
+    console.log(':',response)
+    statistics.value = response
   } catch (error) {
     console.error('获取统计数据失败:', error)
   }
@@ -138,7 +138,7 @@ const fetchStatistics = async () => {
 const fetchRecentSelections = async () => {
   try {
     const response = await getMyStudentsTopics(userStore.user.userId)
-    console.log(response)
+    console.log('最近选题学生：',response)
     recentSelections.value = response.slice(0, 5) // 只显示最近5个
   } catch (error) {
     console.error('获取最近选题学生失败:', error)
@@ -179,42 +179,42 @@ const initGradeChart = () => {
 // 初始化文件统计图表(查询名下学生的文件)
 const initFileChart = async () => {
   try {
-    // const response = await getStudentFilesStatistics(userStore.user.userId)
-    // console.log('文件统计:', response)
-    // const fileStats = response.data.data
+    const response = await getTeacherDashboard(userStore.user.userId)
+    console.log('文件统计:', response)
+    const fileStats = response
     
-    // const chart = echarts.init(fileChart.value)
-    // const option = {
-    //   tooltip: {
-    //     trigger: 'axis',
-    //     axisPointer: {
-    //       type: 'shadow'
-    //     }
-    //   },
-    //   xAxis: {
-    //     type: 'category',
-    //     data: ['开题报告', '中期检查', '论文', '其他']
-    //   },
-    //   yAxis: {
-    //     type: 'value'
-    //   },
-    //   series: [
-    //     {
-    //       name: '文件数量',
-    //       type: 'bar',
-    //       data: [
-    //         fileStats.proposalCount || 0,
-    //         fileStats.reportCount || 0,
-    //         fileStats.thesisCount || 0,
-    //         fileStats.otherCount || 0
-    //       ],
-    //       itemStyle: {
-    //         color: '#409EFF'
-    //       }
-    //     }
-    //   ]
-    // }
-    // chart.setOption(option)
+    const chart = echarts.init(fileChart.value)
+    const option = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
+      xAxis: {
+        type: 'category',
+        data: ['开题报告', '中期检查', '论文', '其他']
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+        {
+          name: '文件数量',
+          type: 'bar',
+          data: [
+            fileStats.fileTypeStatistics.PROPOSAL || 0,
+            fileStats.fileTypeStatistics.THESIS || 0,
+            fileStats.fileTypeStatistics.PPT || 0,
+            fileStats.fileTypeStatistics.OTHER || 0
+          ],
+          itemStyle: {
+            color: '#409EFF'
+          }
+        }
+      ]
+    }
+    chart.setOption(option)
   } catch (error) {
     console.error('获取文件统计失败:', error)
   }

@@ -34,7 +34,7 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch" :loading="loading">
+          <el-button type="primary" @click="handleSearch" :loading="loading" disabled>
             <el-icon><Search /></el-icon>
             搜索
           </el-button>
@@ -356,10 +356,9 @@ import { ElMessage,  } from 'element-plus'
 import { Search, Refresh, Edit, Download, Document } from '@element-plus/icons-vue'
 import { getStudentFiles } from '@/api/file'
 import { scoreThesis,scoreDefense } from '@/api/grades'
-import {
-  getStudentInfo,
-  downloadFile,
-   } from '@/api/user'
+import { downloadFile,getMystudentFilesCat,getMyStudentFilesAll } from '@/api/file'
+import { getStudentInfo } from '@/api/user'
+import { getMyStudentsTopicsInfo,getMyTeachersTopicsInfo } from '@/api/topics'
 // 响应式数据
 const loading = ref(false)
 const studentList = ref([])
@@ -445,16 +444,30 @@ const fetchStudentList = async () => {
       pageSize: pagination.size,
       ...filterForm
     }
-    
-    const response = await getStudentInfo(params)
-    // console.log(response)
-    if (response.data.code === 200) {
-      studentList.value = response.data.data.records
-      total.value = response.data.data.total
+    const response = await getMyStudentsTopicsInfo()
+    console.log('学生列表：',response)
+    studentList.value = response
+    total.value = response.length
+    //
+    // const tests = await getMyStudentsTopicsInfo()
+    // console.log('我的学生选题：',tests)
+
+    // const tests2 = await getMyStudentFilesAll()
+    // console.log('老师查看所有指导学生的文件汇总',tests2)
+
+    // const tests3 = await getMyTeachersTopicsInfo('S005')
+    // console.log('我的学生选题：',tests3)
+
+    // const tests4 = await getMystudentFilesCat('S005')
+    // console.log('我的学生选题：',tests4)
+
+    //
+
+
+
       
-      // 获取每个学生的文件数量
-      await fetchFileCountsForStudents()
-    }
+    // 获取每个学生的文件数量
+    await fetchFileCountsForStudents()
   } catch (error) {
     console.error('获取学生列表失败:', error)
     ElMessage.error('获取学生列表失败')
@@ -480,7 +493,8 @@ const fetchFileCountsForStudents = async () => {
 // 搜索
 const handleSearch = () => {
   pagination.current = 1
-  fetchStudentList()
+  // fetchStudentList()
+  ElMessage.info('功能开发中...')
 }
 
 // 重置
@@ -526,13 +540,9 @@ const handleSubmitThesisGrade = async () => {
     thesisGradeDialog.loading = true
     
     const response = await scoreThesis(thesisGradeDialog.form)
-    if (response.data.code === 200) {
-      ElMessage.success('论文评分成功')
-      thesisGradeDialog.visible = false
-      fetchStudentList()
-    } else {
-      ElMessage.error(response.data.message || '评分失败')
-    }
+    ElMessage.success('论文评分成功')
+    thesisGradeDialog.visible = false
+    fetchStudentList()
   } catch (error) {
     if (error.response) {
       ElMessage.error(error.response.data.message || '评分失败')
@@ -558,13 +568,9 @@ const handleSubmitDefenseGrade = async () => {
     defenseGradeDialog.loading = true
     
     const response = await scoreDefense(defenseGradeDialog.form)
-    if (response.data.code === 200) {
-      ElMessage.success('答辩评分成功')
-      defenseGradeDialog.visible = false
-      fetchStudentList()
-    } else {
-      ElMessage.error(response.data.message || '评分失败')
-    }
+    ElMessage.success('答辩评分成功')
+    defenseGradeDialog.visible = false
+    fetchStudentList()
   } catch (error) {
     if (error.response) {
       ElMessage.error(error.response.data.message || '评分失败')
@@ -581,7 +587,7 @@ const handleBatchGrade = () => {
 
 // 导出成绩
 const handleExportGrades = async () => {
-  ElMessage.info('导出成绩功能开发中...')
+  ElMessage.info('前往成绩管理进行导出...')
   // try {
   //   const response = await axios.post('/api/grade/export', {
   //     format: 'xlsx'
@@ -608,11 +614,9 @@ const handleExportGrades = async () => {
 // 查看学生详情
 const handleViewDetail = async (row) => {
   try {
-    const response = await getStudentInfo(row.studentId)
-    if (response.data.code === 200) {
-      studentDetailDialog.data = response.data.data
-      studentDetailDialog.visible = true
-    }
+    const response = await getMyTeachersTopicsInfo(row.studentId)
+    studentDetailDialog.data = response
+    studentDetailDialog.visible = true
   } catch (error) {
     ElMessage.error('获取学生详情失败')
   }
@@ -630,9 +634,7 @@ const handleViewFiles = async (row) => {
     filesDialog.visible = true
     
     const response = await getStudentFiles(row.studentId)
-    if (response.data.code === 200) {
-      filesDialog.files = response.data.data
-    }
+    filesDialog.files = response
   } catch (error) {
     ElMessage.error('获取文件列表失败')
   } finally {

@@ -272,11 +272,8 @@ const loadGrades = async () => {
     console.log('==========成绩列表==========')
     console.log(response)
     console.log('============================')
-    // const response = null
-    if (response.code === 200) {
-      gradeList.value = response.records
-      pagination.total = response.total
-    }
+    gradeList.value = response.records
+    pagination.total = response.total
   } catch (error) {
     ElMessage.error('加载成绩列表失败')
   } finally {
@@ -290,9 +287,7 @@ const loadStatistics = async () => {
     console.log('==========统计信息==========')
     console.log(response)
     console.log('============================')
-    if (response.code === 200) {
-      statistics.value = response
-    }
+    statistics.value = response
   } catch (error) {
     console.error('加载统计信息失败:', error)
   }
@@ -341,12 +336,10 @@ const submitThesisScore = async () => {
     console.log('==========论文评分==========')
     console.log(response)
     console.log('============================')
-    if (response.data.code === 200) {
-      ElMessage.success('论文评分成功')
-      thesisScoreDialog.value = false
-      loadGrades()
-      loadStatistics()
-    }
+    ElMessage.success('论文评分成功')
+    thesisScoreDialog.value = false
+    loadGrades()
+    loadStatistics()
   } catch (error) {
     if (error.response?.data?.message) {
       ElMessage.error(error.response.data.message)
@@ -375,12 +368,10 @@ const submitDefenseScore = async () => {
     console.log('==========答辩评分==========')
     console.log(response)
     console.log('============================')
-    if (response.data.code === 200) {
       ElMessage.success('答辩评分成功')
       defenseScoreDialog.value = false
       loadGrades()
       loadStatistics()
-    }
   } catch (error) {
     if (error.response?.data?.message) {
       ElMessage.error(error.response.data.message)
@@ -394,11 +385,9 @@ const submitDefenseScore = async () => {
 const calculateFinalGradee = async (studentId) => {
   try {
     const response = await calculateFinalGrade(studentId)
-    if (response.data.code === 200) {
-      ElMessage.success('最终成绩计算成功')
-      loadGrades()
-      loadStatistics()
-    }
+    ElMessage.success('最终成绩计算成功')
+    loadGrades()
+    loadStatistics()
   } catch (error) {
     ElMessage.error('计算最终成绩失败')
   }
@@ -412,12 +401,9 @@ const batchCalculateFinalGrades = async () => {
     })
     
     // const response = await batchCalculateFinalGrade()
-    const response = null
-    if (response.data.code === 200) {
-      ElMessage.success('批量计算最终成绩成功')
-      loadGrades()
-      loadStatistics()
-    }
+    ElMessage.success('批量计算最终成绩成功')
+    loadGrades()
+    loadStatistics()
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('批量计算最终成绩失败')
@@ -428,27 +414,52 @@ const batchCalculateFinalGrades = async () => {
 // 导出成绩
 const exportGrades = async () => {
   try {
+    // 获取所有选中的学生的 studentId
+    const selectedStudentIds = selectedGrades.value.map(grade => grade.studentId);
+
+    // 构建请求参数
     const params = {
-      teacherId: userStore.user.userId,
+      studentIds: selectedStudentIds,
       format: 'xlsx'
-    }
-    
-    const response = await exportGrade(params)
-    
+    };
+
+    console.log('Export grades params:', params); // 打印参数
+
+    // 确保 responseType 为 'blob'
+    const response = await exportGrade(params, { responseType: 'blob' });
+
+    // 打印 response.data 的内容
+    // console.log('Response data:', response.data);
+
+    // 创建 Blob
+    const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    console.log('Blob info:', blob); // 打印 Blob 信息
+
+    // 验证 Blob 数据（可选）
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      console.log('Blob content:', reader.result);
+    };
+    reader.readAsDataURL(blob);
+
     // 创建下载链接
-    const blob = new Blob([response.data])
-    const url = window.URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `成绩导出_${new Date().toISOString().split('T')[0]}.xlsx`
-    link.click()
-    window.URL.revokeObjectURL(url)
-    
-    ElMessage.success('成绩导出成功')
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `成绩导出_${new Date().toISOString().split('T')[0]}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+
+    // 清理
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+
+    ElMessage.success('成绩导出成功');
   } catch (error) {
-    ElMessage.error('导出成绩失败')
+    ElMessage.error('导出成绩失败');
+    console.error('Export grades failed:', error);
   }
-}
+};
 
 onMounted(() => {
   loadGrades()

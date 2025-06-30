@@ -64,6 +64,7 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="profile">个人资料</el-dropdown-item>
+                <el-dropdown-item command="password">修改密码</el-dropdown-item>
                 <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -100,20 +101,58 @@
         <el-form-item label="院系" prop="department">
           <el-input v-model="profileForm.department" />
         </el-form-item>
-        
-        <el-form-item label="新密码" prop="password">
+
+      </el-form>
+      
+      <template #footer>
+        <el-button @click="profileDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="updateProfile">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 修改密码对话框 -->
+    <el-dialog
+      v-model="passwordDialogVisible"
+      title="修改密码"
+      width="500px"
+    >
+      <el-form
+        ref="passwordFormRef"
+        :model="passwordForm"
+        :rules="passwordRules"
+        label-width="100px"
+      >
+        <el-form-item label="当前密码" prop="oldPassword">
           <el-input
-            v-model="profileForm.password"
+            v-model="passwordForm.oldPassword"
             type="password"
-            placeholder="不修改请留空"
+            placeholder="请输入当前密码"
+            show-password
+          />
+        </el-form-item>
+        
+        <el-form-item label="新密码" prop="newPassword">
+          <el-input
+            v-model="passwordForm.newPassword"
+            type="password"
+            placeholder="请输入新密码"
+            show-password
+          />
+        </el-form-item>
+        
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input
+            v-model="passwordForm.confirmPassword"
+            type="password"
+            placeholder="请再次输入新密码"
             show-password
           />
         </el-form-item>
       </el-form>
       
       <template #footer>
-        <el-button @click="profileDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="updateProfile">保存</el-button>
+        <el-button @click="passwordDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="changePwd">确定</el-button>
       </template>
     </el-dialog>
   </el-container>
@@ -132,14 +171,16 @@ import {
   Folder,
   ArrowDown
 } from '@element-plus/icons-vue'
-import api from '@/utils/api'
+import { changePassword,updateTeacherInfo } from '@/api/user'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
 const profileDialogVisible = ref(false)
+const passwordDialogVisible = ref(false)
 const profileFormRef = ref()
+const passwordFormRef = ref()
 
 const activeMenu = computed(() => route.path)
 const avatarUrl = ref('')
@@ -177,6 +218,13 @@ const profileRules = {
   ]
 }
 
+// 修改密码表单
+const passwordForm = reactive({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+
 // 初始化个人资料
 const initProfile = () => {
   const user = userStore.user
@@ -186,6 +234,37 @@ const initProfile = () => {
     profileForm.department = user.department || ''
   }
 }
+// 自定义验证规则
+const validateConfirmPassword = (rule, value, callback) => {
+  if (value === '') {
+    callback(new Error('请再次输入新密码'))
+  } else if (value !== passwordForm.newPassword) {
+    callback(new Error('两次输入的密码不一致'))
+  } else {
+    callback()
+  }
+}
+const passwordRules = {
+  oldPassword: [
+    { required: true, message: '请输入当前密码', trigger: 'blur' }
+  ],
+  newPassword: [
+    { required: true, message: '请输入新密码', trigger: 'blur' },
+    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, validator: validateConfirmPassword, trigger: 'blur' }
+  ]
+}
+
+
+// 重置密码表单
+const resetPasswordForm = () => {
+  passwordForm.oldPassword = ''
+  passwordForm.newPassword = ''
+  passwordForm.confirmPassword = ''
+  passwordFormRef.value?.clearValidate()
+}
 
 // 处理下拉菜单命令
 const handleCommand = (command) => {
@@ -193,6 +272,10 @@ const handleCommand = (command) => {
     case 'profile':
       initProfile()
       profileDialogVisible.value = true
+      break
+    case 'password':
+      resetPasswordForm()
+      passwordDialogVisible.value = true
       break
     case 'logout':
       handleLogout()
@@ -215,7 +298,7 @@ const updateProfile = async () => {
       updateData.password = profileForm.password
     }
     
-    await api.put('/user/teacher', updateData)
+    await updateTeacherInfo(updateData)
     
     // 更新本地用户信息
     userStore.updateUserInfo({
@@ -229,6 +312,40 @@ const updateProfile = async () => {
     
   } catch (error) {
     ElMessage.error('更新失败')
+  }
+}
+
+// 修改密码
+const changePwd = async () => {
+  try {
+    await passwordFormRef.value.validate()
+    
+    const passwordData = {
+      oldPassword: passwordForm.oldPassword,
+      newPassword: passwordForm.newPassword
+    }
+    
+    await changePassword(passwordData)
+    
+    ElMessage.success('密码修改成功')
+    passwordDialogVisible.value = false
+    resetPasswordForm()
+    
+    // 提示用户重新登录
+    setTimeout(() => {
+      ElMessageBox.confirm('密码已修改，需要重新登录', '提示', {
+        confirmButtonText: '重新登录',
+        cancelButtonText: '稍后',
+        type: 'info'
+      }).then(() => {
+        handleLogout()
+      }).catch(() => {
+        // 用户选择稍后登录
+      })
+    }, 1000)
+    
+  } catch (error) {
+    ElMessage.error(error.response?.data?.message || '密码修改失败')
   }
 }
 
@@ -258,6 +375,13 @@ watch(() => userStore.user, (newUser) => {
     router.push('/login')
   }
 }, { immediate: true })
+
+// 监听密码对话框关闭
+watch(passwordDialogVisible, (visible) => {
+  if (!visible) {
+    resetPasswordForm()
+  }
+})
 </script>
 
 <style scoped>

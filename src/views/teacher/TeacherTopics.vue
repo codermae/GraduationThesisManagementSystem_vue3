@@ -2,7 +2,7 @@
   <div class="teacher-topics">
     <!-- 工具栏 -->
     <div class="toolbar">
-      <el-button type="primary" @click="showCreateDialog = true">
+      <el-button type="primary" @click="createNewTopic">
         <el-icon><Plus /></el-icon>
         发布新选题
       </el-button>
@@ -250,6 +250,12 @@ const submitTopic = async () => {
   } finally {
     submitting.value = false
   }
+}
+
+//发布新选题
+const createNewTopic = () => {
+  resetForm()
+  showCreateDialog.value = true
 }
 
 // 重置表单

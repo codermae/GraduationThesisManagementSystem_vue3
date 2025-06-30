@@ -21,6 +21,7 @@ export const getStudentInfo = (studentId) => {
   return api.get(`/user/student/${studentId}`)
 }
 
+// 修改密码
 export const changePassword = (data) => {
   return api.put('/user/change-password',data)
 }

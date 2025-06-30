@@ -55,12 +55,12 @@
         <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-item">
-              <div class="stat-value">{{ statistics.formattedTotalSize }}</div>
+              <div class="stat-value">{{ statistics.totalSize }}</div>
               <div class="stat-label">总文件大小</div>
             </div>
           </el-card>
         </el-col>
-        <el-col :span="6">
+        <!-- <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-item">
               <div class="stat-value">{{ statistics.thesisCount }}</div>
@@ -75,7 +75,7 @@
               <div class="stat-label">开题报告</div>
             </div>
           </el-card>
-        </el-col>
+        </el-col> -->
       </el-row>
 
       <!-- 文件列表 -->
@@ -84,14 +84,14 @@
           <div class="card-header">
             <span>文件列表</span>
             <div class="header-actions">
-              <el-button
+              <!-- <el-button
                 type="danger"
                 :disabled="selectedFiles.length === 0"
                 @click="handleBatchDelete"
                 :icon="Delete"
               >
                 批量删除 ({{ selectedFiles.length }})
-              </el-button>
+              </el-button> -->
             </div>
           </div>
         </template>
@@ -117,7 +117,7 @@
           <el-table-column prop="fileCategoryName" label="文件类型" width="120">
             <template #default="{ row }">
               <el-tag :type="getCategoryTagType(row.fileCategory)">
-                {{ row.fileCategoryName }}
+                {{ row.fileCategory }}
               </el-tag>
             </template>
           </el-table-column>
@@ -146,14 +146,14 @@
               >
                 下载
               </el-button>
-              <el-button
+              <!-- <el-button
                 type="danger"
                 size="small"
                 @click="handleDelete(row)"
                 :icon="Delete"
               >
                 删除
-              </el-button>
+              </el-button> -->
             </template>
           </el-table-column>
         </el-table>
@@ -186,8 +186,8 @@ import {
   deleteFile,
   batchDeleteFiles,
   getFilesPage,
-  getFilesStatistics,
-  getStudentFilesStatistics
+  getMystudentFilesCat,
+  getMyStudentFilesAll
  } from '@/api/file'
 
 const route = useRoute()
@@ -269,7 +269,7 @@ const handleDownload = async (row) => {
     const response = await downloadFile(row.fileId)
     
     // 创建下载链接
-    const blob = new Blob([response.data])
+    const blob = new Blob([response])
     const url = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
@@ -296,7 +296,7 @@ const handleDelete = async (row) => {
         type: 'warning'
       }
     )
-    
+    console.log(row)
     await deleteFile(row.fileId)
     ElMessage.success('删除成功')
     fetchFiles()
@@ -327,7 +327,7 @@ const handleBatchDelete = async () => {
     
     const fileIds = selectedFiles.value.map(file => file.fileId)
     await batchDeleteFiles(fileIds)
-    
+
     ElMessage.success('批量删除成功')
     selectedFiles.value = []
     fetchFiles()
@@ -349,14 +349,14 @@ const fetchFiles = async () => {
       fileCategory: searchForm.fileCategory,
       fileType: searchForm.fileType
     }
-    
     if (route.params.studentId) {
       params.studentId = route.params.studentId
     }
     
     const response = await getFilesPage(params)
-    fileList.value = response.data.records
-    pagination.total = response.data.total
+    console.log('ttt',response.length)
+    fileList.value = response.records
+    pagination.total = response.total
   } catch (error) {
     ElMessage.error('获取文件列表失败')
   } finally {
@@ -368,11 +368,12 @@ const fetchStatistics = async () => {
   try {
     let response
     if (route.params.studentId) {
-      response = await getStudentFilesStatistics(route.params.studentId)
+      response = await getMystudentFilesCat(route.params.studentId)
     } else {
-      response = await getFilesStatistics()
+      response = await getMyStudentFilesAll()
     }
-    statistics.value = response.data
+    console.log('aaaaaaaaaaaaaaa',response)
+    statistics.value = response
   } catch (error) {
     console.error('获取统计信息失败', error)
   }
