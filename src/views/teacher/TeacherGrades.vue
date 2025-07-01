@@ -269,9 +269,9 @@ const loadGrades = async () => {
     }
     
     const response = await getGradeList(params)
-    console.log('==========成绩列表==========')
-    console.log(response)
-    console.log('============================')
+    // console.log('==========成绩列表==========')
+    // console.log(response)
+    // console.log('============================')
     gradeList.value = response.records
     pagination.total = response.total
   } catch (error) {
@@ -284,9 +284,9 @@ const loadGrades = async () => {
 const loadStatistics = async () => {
   try {
     const response = await getGradeStatistics(userStore.user.userId)
-    console.log('==========统计信息==========')
-    console.log(response)
-    console.log('============================')
+    // console.log('==========统计信息==========')
+    // console.log(response)
+    // console.log('============================')
     statistics.value = response
   } catch (error) {
     console.error('加载统计信息失败:', error)
@@ -311,7 +311,7 @@ const handleSelectionChange = (selection) => {
 
 const getScoreType = (score) => {
   if (score >= 90) return 'success'
-  if (score >= 80) return ''
+  if (score >= 80) return 'primary'
   if (score >= 70) return 'warning'
   if (score >= 60) return 'info'
   return 'danger'
@@ -333,9 +333,9 @@ const submitThesisScore = async () => {
     await thesisScoreFormRef.value.validate()
     
     const response = await scoreThesis(thesisScoreForm)
-    console.log('==========论文评分==========')
-    console.log(response)
-    console.log('============================')
+    // console.log('==========论文评分==========')
+    // console.log(response)
+    // console.log('============================')
     ElMessage.success('论文评分成功')
     thesisScoreDialog.value = false
     loadGrades()
@@ -365,9 +365,9 @@ const submitDefenseScore = async () => {
     await defenseScoreFormRef.value.validate()
     
     const response = await scoreDefense(defenseScoreForm)
-    console.log('==========答辩评分==========')
-    console.log(response)
-    console.log('============================')
+    // console.log('==========答辩评分==========')
+    // console.log(response)
+    // console.log('============================')
       ElMessage.success('答辩评分成功')
       defenseScoreDialog.value = false
       loadGrades()
@@ -423,7 +423,8 @@ const exportGrades = async () => {
       format: 'xlsx'
     };
 
-    console.log('Export grades params:', params); // 打印参数
+    // 打印参数
+    // console.log('Export grades params:', params);
 
     // 确保 responseType 为 'blob'
     const response = await exportGrade(params, { responseType: 'blob' });
@@ -433,12 +434,13 @@ const exportGrades = async () => {
 
     // 创建 Blob
     const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    console.log('Blob info:', blob); // 打印 Blob 信息
+    // 打印 Blob 信息
+    // console.log('Blob info:', blob); 
 
     // 验证 Blob 数据（可选）
     const reader = new FileReader();
     reader.onloadend = () => {
-      console.log('Blob content:', reader.result);
+      // console.log('Blob content:', reader.result);
     };
     reader.readAsDataURL(blob);
 

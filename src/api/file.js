@@ -47,7 +47,7 @@ export const batchDeleteFiles = (data) => {
   return api.delete('/files/batch', { data })
 }
 
-// 老师查看所有指导学生的文件汇总
+// 老师查看所有指导学生的文件统计
 export const getMyStudentFilesAll = () => {
   return api.get('/files/teacher/my-students/files')
 }

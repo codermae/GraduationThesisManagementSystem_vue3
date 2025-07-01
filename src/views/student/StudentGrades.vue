@@ -275,22 +275,22 @@ const loadGrades = async () => {
       getDefenseGrade(studentId),
       getFinalGrade(studentId)
     ])
-    console.log('====================================');
-    console.log(thesisRes, defenseRes, finalRes);
-    console.log('====================================');
+    // console.log('====================================');
+    // console.log(thesisRes, defenseRes, finalRes);
+    // console.log('====================================');
 
     // 处理论文成绩
-    if (thesisRes.status === 'fulfilled' && thesisRes.value.thesisScore) {
-      thesisGrade.value = thesisRes.value
+    if (thesisRes.status === 'fulfilled' && thesisRes.value?.thesisScore !== undefined) {
+      thesisGrade.value = thesisRes.value 
     }
 
     // 处理答辩成绩
-    if (defenseRes.status === 'fulfilled' && defenseRes.value.score) {
+    if (defenseRes.status === 'fulfilled' && defenseRes.value?.score !== undefined) {
       defenseGrade.value = defenseRes.value
     }
 
     // 处理最终成绩
-    if (finalRes.status === 'fulfilled' && finalRes.value.finalScore) {
+    if (finalRes.status === 'fulfilled' && finalRes.value?.finalScore !== undefined) {
       finalGrade.value = finalRes.value
     }
 

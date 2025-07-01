@@ -259,6 +259,7 @@ const fetchTopics = async () => {
       size: pagination.size
     }
     const response = await getTopicsPage(params)
+    // console.log('dadada',response)
     topics.value = response.records
     pagination.total = response.total
   } catch (error) {
@@ -271,9 +272,9 @@ const fetchTopics = async () => {
 const fetchMySelection = async () => {
   try {
     const response = await getMySelectedTopic()
-    console.log('====================================');
-    console.log('我的选题信息:', response);
-    console.log('====================================');
+    // console.log('====================================');
+    // console.log('我的选题信息:', response);
+    // console.log('====================================');
     mySelection.value = response
   } catch (error) {
     console.error('获取我的选题失败:', error)
@@ -329,7 +330,7 @@ const handleSelectTopic = async (topic) => {
     
     selectLoading.value = true
     const response = await selectTopic({ topicId: topic.topicId })
-    console.log(response)
+    // console.log(response)
     ElMessage.success('选题成功')
     await fetchMySelection()
     await fetchTopics()
@@ -359,7 +360,7 @@ const handleCancelSelection = async () => {
     
     cancelLoading.value = true
     const response = await cancelSelectTopic()
-    console.log(response)
+    // console.log(response)
     ElMessage.success('取消选题成功')
     mySelection.value = null
     await fetchTopics()

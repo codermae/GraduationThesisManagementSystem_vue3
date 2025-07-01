@@ -138,8 +138,8 @@
         
         <el-table-column label="文件状态" width="100" align="center">
           <template #default="{ row }">
-            <el-badge :value="row.fileCount || 0" class="file-badge">
-              <el-button type="text" @click="handleViewFiles(row)">
+            <el-badge :value="row.fileCount || 0" class="file-badge-custom">
+              <el-button link @click="handleViewFiles(row)">
                 <el-icon><Document /></el-icon>
               </el-button>
             </el-badge>
@@ -308,10 +308,10 @@
       <div style="margin-top: 20px;">
         <h4>操作记录</h4>
         <el-timeline>
-          <el-timeline-item v-if="studentDetailDialog.data?.calculatedAt" timestamp="最终成绩计算时间" :time="formatDate(studentDetailDialog.data.calculatedAt)">
+          <el-timeline-item v-if="studentDetailDialog.data?.calculatedAt" :timestamp="formatDate(studentDetailDialog.data.calculatedAt)">
             最终成绩已计算完成
           </el-timeline-item>
-          <el-timeline-item timestamp="选题时间" :time="formatDate(studentDetailDialog.data?.selectionDate)">
+          <el-timeline-item :timestamp="formatDate(studentDetailDialog.data?.selectionDate)">
             学生完成选题
           </el-timeline-item>
         </el-timeline>
@@ -353,7 +353,7 @@
 <script setup>
 import { ref, reactive, onMounted,  } from 'vue'
 import { ElMessage,  } from 'element-plus'
-import { Search, Refresh, Edit, Download, Document } from '@element-plus/icons-vue'
+import { Search, Refresh, Edit, Download, Document, Position } from '@element-plus/icons-vue'
 import { getStudentFiles } from '@/api/file'
 import { scoreThesis,scoreDefense } from '@/api/grades'
 import { downloadFile,getMystudentFilesCat,getMyStudentFilesAll } from '@/api/file'
@@ -445,7 +445,7 @@ const fetchStudentList = async () => {
       ...filterForm
     }
     const response = await getMyStudentsTopicsInfo()
-    console.log('学生列表：',response)
+    // console.log('学生列表：',response)
     studentList.value = response
     total.value = response.length
     //
@@ -463,8 +463,6 @@ const fetchStudentList = async () => {
 
     //
 
-
-
       
     // 获取每个学生的文件数量
     await fetchFileCountsForStudents()
@@ -481,9 +479,8 @@ const fetchFileCountsForStudents = async () => {
   for (const student of studentList.value) {
     try {
       const response = await getStudentFiles(student.studentId)
-      if (response.data.code === 200) {
-        student.fileCount = response.data.data.totalFiles
-      }
+      // console.log('获取文件数量111:', response.length)
+      student.fileCount = response.length
     } catch (error) {
       student.fileCount = 0
     }
@@ -617,6 +614,7 @@ const handleViewDetail = async (row) => {
     const response = await getMyTeachersTopicsInfo(row.studentId)
     studentDetailDialog.data = response
     studentDetailDialog.visible = true
+    console.log('学生详情：',studentDetailDialog.data?.selectionDate)
   } catch (error) {
     ElMessage.error('获取学生详情失败')
   }
@@ -671,7 +669,21 @@ const getScoreType = (score) => {
 // 格式化日期
 const formatDate = (dateString) => {
   if (!dateString) return '-'
-  return new Date(dateString).toLocaleString('zh-CN')
+  
+  try {
+    const date = new Date(dateString)
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    })
+  } catch (error) {
+    return '-'
+  }
 }
 
 // 格式化文件大小
@@ -767,5 +779,17 @@ onMounted(() => {
 
 :deep(.el-badge__content) {
   font-size: 10px;
+}
+
+.file-badge-custom :deep(.el-badge__content) {
+  top: 5px !important;           /* 向下调整位置 */
+  right: 5px !important;         /* 向左调整位置 */
+  transform: translate(50%, -40%) !important;  /* 重新定位中心点 */
+  font-size: 10px !important;
+  height: 13px !important;       /* 高度 */
+  min-width: 13px !important;   /* 宽度与高度一致 */
+  line-height: 13px !important;
+  padding: 0 !important;        /* 避免padding影响形状 */
+  border-radius: 50% !important; /* 强制圆形 */
 }
 </style>

@@ -124,10 +124,10 @@ const fileChart = ref(null)
 
 // 获取统计数据（发布选题、指导学生、已评分、带评分
 const fetchStatistics = async () => {
-  console.log(userStore)
+  // console.log(userStore)
   try {
     const response = await getTeacherDashboard(userStore.user.userId)
-    console.log(':',response)
+    // console.log(':',response)
     statistics.value = response
   } catch (error) {
     console.error('获取统计数据失败:', error)
@@ -138,7 +138,7 @@ const fetchStatistics = async () => {
 const fetchRecentSelections = async () => {
   try {
     const response = await getMyStudentsTopics(userStore.user.userId)
-    console.log('最近选题学生：',response)
+    // console.log('最近选题学生：',response)
     recentSelections.value = response.slice(0, 5) // 只显示最近5个
   } catch (error) {
     console.error('获取最近选题学生失败:', error)
@@ -180,7 +180,7 @@ const initGradeChart = () => {
 const initFileChart = async () => {
   try {
     const response = await getTeacherDashboard(userStore.user.userId)
-    console.log('文件统计:', response)
+    // console.log('文件统计:', response)
     const fileStats = response
     
     const chart = echarts.init(fileChart.value)

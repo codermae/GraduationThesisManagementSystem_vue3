@@ -15,7 +15,7 @@
             />
           </el-form-item>
           <el-form-item label="文件类型">
-            <el-select v-model="searchForm.fileCategory" placeholder="请选择文件类型" clearable>
+            <el-select v-model="searchForm.fileCategory" placeholder="请选择文件类型" clearable style="width: 100px">
               <el-option label="开题报告" value="PROPOSAL" />
               <el-option label="中期检查" value="MIDTERM" />
               <el-option label="毕业论文" value="THESIS" />
@@ -23,8 +23,8 @@
               <el-option label="其他" value="OTHER" />
             </el-select>
           </el-form-item>
-          <el-form-item label="文件格式">
-            <el-select v-model="searchForm.fileType" placeholder="请选择文件格式" clearable>
+          <el-form-item label="文件格式"> 
+            <el-select v-model="searchForm.fileType" placeholder="请选择文件格式" clearable style="width: 100px">
               <el-option label="PDF" value="pdf" />
               <el-option label="Word文档" value="doc,docx" />
               <el-option label="PPT" value="ppt,pptx" />
@@ -180,7 +180,7 @@ import { ref, reactive, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Refresh, Download, Delete, Document } from '@element-plus/icons-vue'
-// import { useUserStore } from '@/stores/user'
+import { useUserStore } from '@/stores/user'
 import {
   downloadFile,
   deleteFile,
@@ -192,7 +192,7 @@ import {
 
 const route = useRoute()
 const router = useRouter()
-// const userStore = useUserStore()
+const userStore = useUserStore()
 
 // 页面标题
 const pageTitle = computed(() => {
@@ -296,7 +296,7 @@ const handleDelete = async (row) => {
         type: 'warning'
       }
     )
-    console.log(row)
+    // console.log(row)
     await deleteFile(row.fileId)
     ElMessage.success('删除成功')
     fetchFiles()
@@ -354,7 +354,7 @@ const fetchFiles = async () => {
     }
     
     const response = await getFilesPage(params)
-    console.log('ttt',response.length)
+    // console.log("========111111111============")
     fileList.value = response.records
     pagination.total = response.total
   } catch (error) {
@@ -372,7 +372,8 @@ const fetchStatistics = async () => {
     } else {
       response = await getMyStudentFilesAll()
     }
-    console.log('aaaaaaaaaaaaaaa',response)
+    // console.log(route.params.studentId)
+    // console.log('aaaaaaaaaaaaaaa',response)
     statistics.value = response
   } catch (error) {
     console.error('获取统计信息失败', error)

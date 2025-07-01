@@ -305,9 +305,9 @@ const uploadRef = ref()
 const getFileStatistics = async () => {
   try {
     const response = await getFilesStatistics(userStore.user.userId)
-    console.log('====================================');
-    console.log('获取文件统计信息:', response);
-    console.log('====================================');
+    // console.log('====================================');
+    // console.log('获取文件统计信息:', response);
+    // console.log('====================================');
     statistics.value = response
   } catch (error) {
     console.error('获取文件统计失败:', error)
@@ -325,9 +325,9 @@ const getFileList = async () => {
       studentId: userStore.user.userId
     }
     const response = await getFilesPage(params)
-    console.log('====================================');
-    console.log('获取文件列表:', response);
-    console.log('====================================');
+    // console.log('====================================');
+    // console.log('获取文件列表:', response);
+    // console.log('====================================');
     fileList.value = response.records
     pagination.total = response.total
   } catch (error) {
@@ -377,7 +377,7 @@ const handleUpload = async () => {
       formData.append('studentId', userStore.user.userId)
 
       const response = await uploadFile(formData)
-      console.log(response)
+      // console.log(response)
         ElMessage.success('文件上传成功')
         showUploadDialog.value = false
         resetUploadForm()
@@ -406,9 +406,9 @@ const handleDownload = async (row) => {
   downloadingFiles.value.push(row.fileId)
   try {
     const response = await downloadFile(row.fileId)
-    console.log('====================================');
-    console.log('下载文件:', response);
-    console.log('====================================');
+    // console.log('====================================');
+    // console.log('下载文件:', response);
+    // console.log('====================================');
     // 创建下载链接
     const blob = new Blob([response])
     const url = window.URL.createObjectURL(blob)
@@ -439,7 +439,7 @@ const handleDelete = async (row) => {
     })
     
     const response = await deleteFile(row.fileId)
-    console.log(response)
+    // console.log(response)
     ElMessage.success('文件删除成功')
     await getFileList()
     await getFileStatistics()
@@ -466,7 +466,7 @@ const handleBatchDelete = async () => {
     })
     const fileIds = selectedFiles.value.map(file => file.fileId)
     const response = await batchDeleteFiles(fileIds)
-    console.log(response)
+    // console.log(response)
       ElMessage.success('批量删除成功')
       selectedFiles.value = []
       await getFileList()
@@ -510,7 +510,7 @@ const getCategoryTagType = (category) => {
     'REPORT': 'warning',
     'THESIS': 'primary',
     'PRESENTATION': 'info',
-    'OTHER': 'default'
+    'OTHER': 'danger'
   }
   return typeMap[category] || 'default'
 }
