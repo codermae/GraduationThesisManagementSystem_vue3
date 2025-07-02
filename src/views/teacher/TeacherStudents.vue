@@ -7,7 +7,7 @@
     </div>
 
     <!-- 筛选和搜索区域 -->
-    <el-card class="filter-card" shadow="never">
+    <el-card class="filter-card">
       <el-form :model="filterForm" inline>
         <el-form-item label="学生姓名">
           <el-input
@@ -34,7 +34,7 @@
           />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSearch" :loading="loading" disabled>
+          <el-button type="primary" @click="handleSearch" :loading="loading">
             <el-icon><Search /></el-icon>
             搜索
           </el-button>
@@ -47,7 +47,7 @@
     </el-card>
 
     <!-- 学生列表 -->
-    <el-card class="table-card" shadow="never">
+    <el-card class="table-card">
       <template #header>
         <div class="card-header">
           <span>学生列表 ({{ total }})</span>
@@ -488,10 +488,64 @@ const fetchFileCountsForStudents = async () => {
 }
 
 // 搜索
-const handleSearch = () => {
-  pagination.current = 1
-  // fetchStudentList()
-  ElMessage.info('功能开发中...')
+
+// 完善的搜索函数
+const handleSearch = async () => {
+  try {
+    loading.value = true
+    pagination.current = 1
+    
+    // 获取所有学生数据
+    const allStudents = await getMyStudentsTopicsInfo()
+    
+    // 根据筛选条件过滤数据
+    let filteredStudents = allStudents.filter(student => {
+      let matches = true
+      
+      // 按学生姓名搜索（支持模糊匹配）
+      if (filterForm.studentName && filterForm.studentName.trim()) {
+        const searchName = filterForm.studentName.trim().toLowerCase()
+        const studentName = (student.studentName || '').toLowerCase()
+        matches = matches && studentName.includes(searchName)
+      }
+      
+      // 按班级搜索（支持模糊匹配）
+      if (filterForm.className && filterForm.className.trim()) {
+        const searchClass = filterForm.className.trim().toLowerCase()
+        const className = (student.className || '').toLowerCase()
+        matches = matches && className.includes(searchClass)
+      }
+      
+      // 按专业搜索（支持模糊匹配）
+      if (filterForm.major && filterForm.major.trim()) {
+        const searchMajor = filterForm.major.trim().toLowerCase()
+        const major = (student.major || '').toLowerCase()
+        matches = matches && major.includes(searchMajor)
+      }
+      
+      return matches
+    })
+    
+    // 更新学生列表和总数
+    studentList.value = filteredStudents
+    total.value = filteredStudents.length
+    
+    // 获取过滤后学生的文件数量
+    await fetchFileCountsForStudents()
+    
+    // 搜索结果提示
+    if (filteredStudents.length === 0) {
+      ElMessage.warning('未找到符合条件的学生')
+    } else {
+      ElMessage.success(`找到 ${filteredStudents.length} 名学生`)
+    }
+    
+  } catch (error) {
+    console.error('搜索失败:', error)
+    ElMessage.error('搜索失败，请稍后重试')
+  } finally {
+    loading.value = false
+  }
 }
 
 // 重置

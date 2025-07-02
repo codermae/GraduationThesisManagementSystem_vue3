@@ -63,14 +63,14 @@
             style="width: 160px"
           />
         </el-form-item>
-        <el-form-item label="指导老师">
+        <!-- <el-form-item label="指导老师">
           <el-input 
             v-model="searchForm.teacherName" 
             placeholder="请输入老师姓名"
             clearable
             style="width: 140px"
           />
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item label="状态">
           <el-select 
             v-model="searchForm.isSelected" 
@@ -240,7 +240,7 @@ const searchForm = reactive({
   title: '',
   difficulty: '',
   direction: '',
-  teacherName: '',
+  // teacherName: '',
   isSelected: null
 })
 

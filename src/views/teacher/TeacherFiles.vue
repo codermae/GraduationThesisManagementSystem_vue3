@@ -1,6 +1,10 @@
 <template>
   <div class="files-container">
-    <el-page-header @back="handleBack" :content="pageTitle" />
+    <!-- 页面标题 -->
+    <div class="page-header">
+      <h2>文件管理</h2>
+      <p class="page-description">管理学生提交的文件，教师仅允许查看和下载学生的文件</p>
+    </div>
     
     <div class="content-wrapper">
       <!-- 搜索区域 -->
@@ -47,7 +51,7 @@
         <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-item">
-              <div class="stat-value">{{ statistics.totalFiles }}</div>
+              <div class="stat-value">{{ statistics.totalFiles || 0}}</div>
               <div class="stat-label">总文件数</div>
             </div>
           </el-card>
@@ -55,15 +59,15 @@
         <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-item">
-              <div class="stat-value">{{ statistics.totalSize }}</div>
+              <div class="stat-value">{{ formatFileSize(statistics.totalSize) || 0 }}</div>
               <div class="stat-label">总文件大小</div>
             </div>
           </el-card>
         </el-col>
-        <!-- <el-col :span="6">
+        <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-item">
-              <div class="stat-value">{{ statistics.thesisCount }}</div>
+              <div class="stat-value">{{ statistics.filesByCategory?.THESIS || 0 }}</div>
               <div class="stat-label">毕业论文</div>
             </div>
           </el-card>
@@ -71,11 +75,11 @@
         <el-col :span="6">
           <el-card class="stat-card">
             <div class="stat-item">
-              <div class="stat-value">{{ statistics.proposalCount }}</div>
+              <div class="stat-value">{{ statistics.filesByCategory?.PROPOSAL || 0 }}</div>
               <div class="stat-label">开题报告</div>
             </div>
           </el-card>
-        </el-col> -->
+        </el-col>
       </el-row>
 
       <!-- 文件列表 -->
@@ -100,6 +104,7 @@
           v-loading="loading"
           :data="fileList"
           @selection-change="handleSelectionChange"
+          stripe
           style="width: 100%"
         >
           <el-table-column type="selection" width="55" />
@@ -159,7 +164,7 @@
         </el-table>
 
         <!-- 分页 -->
-        <div class="pagination-wrapper">
+        <div class="pagination-container">
           <el-pagination
             v-model:current-page="pagination.current"
             v-model:page-size="pagination.size"
@@ -205,11 +210,9 @@ const fileList = ref([])
 const selectedFiles = ref([])
 const statistics = ref({
   totalFiles: 0,
-  formattedTotalSize: '0 B',
-  thesisCount: 0,
-  proposalCount: 0,
-  reportCount: 0,
-  otherCount: 0
+  totalSize: 0,
+  filesByCategory: {},
+  filesByStudent: {}
 })
 
 // 搜索表单
@@ -367,11 +370,11 @@ const fetchFiles = async () => {
 const fetchStatistics = async () => {
   try {
     let response
-    if (route.params.studentId) {
-      response = await getMystudentFilesCat(route.params.studentId)
-    } else {
+    // if (route.params.studentId) {
+      // response = await getMystudentFilesCat(route.params.studentId)
+    // } else {
       response = await getMyStudentFilesAll()
-    }
+    // }
     // console.log(route.params.studentId)
     // console.log('aaaaaaaaaaaaaaa',response)
     statistics.value = response
@@ -419,6 +422,22 @@ onMounted(() => {
 <style scoped>
 .files-container {
   padding: 20px;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-header h2 {
+  margin: 0;
+  color: #303133;
+  font-size: 24px;
+}
+
+.page-description {
+  margin: 8px 0 0 0;
+  color: #909399;
+  font-size: 14px;
 }
 
 .content-wrapper {
@@ -483,9 +502,10 @@ onMounted(() => {
   font-size: 12px;
 }
 
-.pagination-wrapper {
+.pagination-container {
+  display: flex;
+  justify-content: center;
   margin-top: 20px;
-  text-align: center;
 }
 
 .el-table .el-table__cell {

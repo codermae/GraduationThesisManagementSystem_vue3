@@ -1,7 +1,10 @@
 <template>
   <div class="grades-container">
     <div class="page-header">
-      <h2>成绩管理</h2>
+      <div>
+        <h2>成绩管理</h2>
+        <p class="page-description">对您的学生进行评分</p>
+      </div>
       <div class="header-actions">
         <el-button type="primary" @click="batchCalculateFinalGrades">
           批量计算最终成绩
@@ -483,6 +486,14 @@ onMounted(() => {
 
 .page-header h2 {
   margin: 0;
+  color: #303133;
+  font-size: 24px;
+}
+
+.page-description {
+  margin: 8px 0 0 0;
+  color: #909399;
+  font-size: 14px;
 }
 
 .header-actions {

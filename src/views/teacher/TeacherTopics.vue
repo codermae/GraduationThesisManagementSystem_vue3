@@ -166,7 +166,8 @@ const topicRules = {
 const fetchTopics = async () => {
   loading.value = true
   try {
-    const response = await getMyTopics(userStore.user.userId)
+    // const response = await getMyTopics(userStore.user.userId)
+    const response = await getMyTopics()
     topics.value = response
   } catch (error) {
     ElMessage.error('获取选题列表失败')

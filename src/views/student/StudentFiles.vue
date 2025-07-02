@@ -21,7 +21,7 @@
           <el-icon><FolderOpened /></el-icon>
         </div>
         <div class="stat-content">
-          <div class="stat-value">{{ statistics.totalSize || '0 KB' }}</div>
+          <div class="stat-value">{{ formatFileSize(statistics.totalSize) || '0 KB' }}</div>
           <div class="stat-label">总大小</div>
         </div>
       </div>

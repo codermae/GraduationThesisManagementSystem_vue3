@@ -182,17 +182,48 @@ const passwordDialogVisible = ref(false)
 const profileFormRef = ref()
 const passwordFormRef = ref()
 
-const activeMenu = computed(() => route.path)
+const activeMenu = computed(() => {
+  const path = route.path
+  
+  // 处理动态路由，确保正确匹配菜单项
+  if (path.startsWith('/teacher/files')) {
+    return '/teacher/files'
+  }
+  
+  // 可以继续添加其他需要处理的动态路由
+  if (path.startsWith('/teacher/students/')) {
+    return '/teacher/students'
+  }
+  
+  if (path.startsWith('/teacher/topics/')) {
+    return '/teacher/topics'
+  }
+  
+  if (path.startsWith('/teacher/grades/')) {
+    return '/teacher/grades'
+  }
+  
+  return path
+})
 const avatarUrl = ref('')
 
 // 面包屑导航
 const breadcrumbs = computed(() => {
+  const path = route.path
   const breadcrumbMap = {
     '/teacher/dashboard': [{ title: '工作台', path: '/teacher/dashboard' }],
     '/teacher/topics': [{ title: '题目管理', path: '/teacher/topics' }],
     '/teacher/students': [{ title: '学生管理', path: '/teacher/students' }],
     '/teacher/grades': [{ title: '成绩管理', path: '/teacher/grades' }],
     '/teacher/files': [{ title: '文件管理', path: '/teacher/files' }],
+  }
+  // 处理动态路由的面包屑
+  if (path.startsWith('/teacher/files/')) {
+    const studentId = route.params.studentId
+    return [
+      { title: '文件管理', path: '/teacher/files' },
+      { title: `学生文件 (${studentId})`, path: path }
+    ]
   }
   
   return breadcrumbMap[route.path] || []
